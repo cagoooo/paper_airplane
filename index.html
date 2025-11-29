@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科普應用的紙飛機摺紙教案精簡版 | STEM Education</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <!-- 
+    CHOSEN PALETTE: "Energetic & Playful"
+    Primary Blue: #3B82F6 (Tailwind blue-500)
+    Action Yellow: #F59E0B (Tailwind amber-500)
+    Alert Red: #EF4444 (Tailwind red-500)
+    Deep Text: #1F2937 (Tailwind gray-800)
+    Background: #F3F4F6 (Tailwind gray-100)
+    -->
+
+    <!-- 
+    NARRATIVE PLAN SUMMARY:
+    1. Header: Engaging title and hook for 9-12 year olds.
+    2. Introduction: Why paper airplanes are STEM (Science, Technology, Engineering, Math).
+    3. The Physics (Organize/Compare): Visualizing the "Four Forces" using a Radar Chart to compare different plane types (Speed vs. Glide).
+    4. Lesson Timeline (Process): A vertical flow of the 45-minute lesson plan using HTML/CSS (No SVG).
+    5. Flight Data Analysis (Compare/Change): Bar chart showing distance vs. wing type, and a Scatter plot (Plotly) showing flight trajectory simulation.
+    6. Resources (Organize): A styled list of recommended folding books and diagrams.
+    7. Conclusion: Encouragement to experiment.
+    -->
+
+    <!--
+    VISUALIZATION CHOICES & JUSTIFICATION (NO SVG/MERMAID):
+    1. The Four Forces Balance -> Radar Chart (Chart.js) -> Best for comparing multivariate data (Lift, Drag, Gravity, Thrust) across two categories (Glider vs. Dart).
+    2. Lesson Flow -> Styled HTML/CSS Timeline -> Shows sequence clearly without prohibited Mermaid/SVG.
+    3. Flight Distance by Design -> Bar Chart (Chart.js) -> Standard comparison of categorical data, easy for kids to read.
+    4. Trajectory Simulation -> Line Chart (Chart.js) -> Shows 'Change' over space (X/Y coordinates), illustrating launch angles.
+    5. Success Metrics -> Donut Chart (Chart.js) -> Shows 'Inform/Part-to-whole' for successful landing rates.
+    -->
+
+    <style>
+        /* Custom Chart Container Styling per Requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: white;
+            border-radius: 0.5rem;
+            /* Height Controls */
+            height: 300px; 
+            max-height: 400px;
+        }
+
+        /* Responsive height adjustments */
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Timeline vertical line */
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background-color: #3B82F6; /* Blue-500 */
+            z-index: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif; /* Assumes system font fallback if not available */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+    <!-- Header Section -->
+    <header class="bg-blue-600 text-white p-8 text-center shadow-lg">
+        <h1 class="text-3xl md:text-5xl font-bold mb-4">✈️ 飛向天際的科學</h1>
+        <h2 class="text-xl md:text-2xl font-light">科普應用的紙飛機摺紙教案 (精簡版)</h2>
+        <p class="mt-4 text-blue-100">適合對象：9~12歲 (國小中高年級)</p>
+    </header>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <!-- Intro Section -->
+        <div class="md:col-span-2 bg-white rounded-lg shadow-md p-6 border-l-8 border-amber-500">
+            <h3 class="text-2xl font-bold text-gray-800 mb-3">為什麼要學紙飛機？</h3>
+            <p class="text-lg leading-relaxed text-gray-600">
+                紙飛機不僅僅是玩具，它是學習 <strong>空氣動力學 (Aerodynamics)</strong> 最好的入門工具！透過這堂課，學生將變身為小小工程師，親手實驗「力」的平衡。我們將探討如何利用摺紙技巧來改變飛機的重心與翼面，進而控制飛行軌跡。
+            </p>
+        </div>
+
+        <!-- Visualization 1: The Four Forces (Radar Chart) -->
+        <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-blue-600 mb-2">1. 飛行原理：四大力的平衡</h3>
+                <p class="text-sm text-gray-600 mb-2">
+                    飛機要飛得好，必須處理四種力量：<strong>升力 (Lift)</strong>、<strong>重力 (Weight)</strong>、<strong>推力 (Thrust)</strong> 與 <strong>阻力 (Drag)</strong>。不同機型在這四種力量上有不同的表現。
+                </p>
+            </div>
+            <div class="chart-container" style="max-width: 500px;">
+                <canvas id="forcesRadarChart"></canvas>
+            </div>
+            <p class="text-xs text-center text-gray-400 mt-2">▲ 標槍機適合競速 (高推力)，滑翔機適合滯空 (高升力)</p>
+        </div>
+
+        <!-- Visualization 2: Flight Trajectory (Line Chart) -->
+        <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-red-500 mb-2">2. 發射角度與軌跡模擬</h3>
+                <p class="text-sm text-gray-600 mb-2">
+                    工程師在設計時會模擬飛行路徑。發射角度對於「滯空時間」與「飛行距離」有決定性的影響。觀察 30度、45度 與 60度 的差異。
+                </p>
+            </div>
+            <div class="chart-container" style="max-width: 600px;">
+                <canvas id="trajectoryChart"></canvas>
+            </div>
+             <p class="text-xs text-center text-gray-400 mt-2">▲ 45度角通常能獲得最佳的綜合飛行距離</p>
+        </div>
+
+        <!-- Section 3: Lesson Plan Timeline (Structured HTML) -->
+        <div class="md:col-span-2 bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">⏱️ 45分鐘教案流程圖</h3>
+            <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
+                這是一個標準的探究式教學流程 (Inquiry-based Learning)。從觀察開始，經歷實作，最後進行競賽與檢討。
+            </p>
+            
+            <div class="relative max-w-3xl mx-auto">
+                <div class="timeline-line"></div>
+                
+                <!-- Step 1 -->
+                <div class="relative z-10 flex items-center justify-between mb-8 w-full">
+                    <div class="order-1 w-5/12 text-right pr-4">
+                        <h4 class="font-bold text-xl text-blue-600">引起動機 & 原理</h4>
+                        <p class="text-sm text-gray-500">講解四大力與白努利定律</p>
+                    </div>
+                    <div class="order-1 w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold border-4 border-white shadow">
+                        10m
+                    </div>
+                    <div class="order-1 w-5/12 pl-4">
+                        <p class="text-gray-600 text-sm">觀看飛機飛行影片，提問：「為什麼飛機不會掉下來？」</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative z-10 flex items-center justify-between mb-8 w-full">
+                    <div class="order-1 w-5/12 text-right pr-4">
+                        <p class="text-gray-600 text-sm">示範「標槍機」與「滑翔機」兩種基本摺法。</p>
+                    </div>
+                    <div class="order-1 w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold border-4 border-white shadow">
+                        15m
+                    </div>
+                    <div class="order-1 w-5/12 pl-4">
+                        <h4 class="font-bold text-xl text-blue-600">動手實作 (Engineering)</h4>
+                        <p class="text-sm text-gray-500">學生選擇一種機型製作</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative z-10 flex items-center justify-between mb-8 w-full">
+                    <div class="order-1 w-5/12 text-right pr-4">
+                        <h4 class="font-bold text-xl text-blue-600">測試與調整 (Test)</h4>
+                        <p class="text-sm text-gray-500">調整機翼副翼與配重</p>
+                    </div>
+                    <div class="order-1 w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white font-bold border-4 border-white shadow">
+                        10m
+                    </div>
+                    <div class="order-1 w-5/12 pl-4">
+                        <p class="text-gray-600 text-sm">若飛機機頭太重該怎麼辦？若一直轉彎該調整哪裡？</p>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="relative z-10 flex items-center justify-between w-full">
+                    <div class="order-1 w-5/12 text-right pr-4">
+                        <p class="text-gray-600 text-sm">比遠、比久、比準。數據紀錄與分享。</p>
+                    </div>
+                    <div class="order-1 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold border-4 border-white shadow">
+                        10m
+                    </div>
+                    <div class="order-1 w-5/12 pl-4">
+                        <h4 class="font-bold text-xl text-blue-600">飛行大賽 (Data)</h4>
+                        <p class="text-sm text-gray-500">驗收成果</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization 3: Performance Comparison (Bar Chart) -->
+        <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-amber-500 mb-2">3. 機型數據大比拚</h3>
+                <p class="text-sm text-gray-600 mb-2">
+                    在過往的教學數據中，不同摺法的平均飛行表現。這能幫助學生根據比賽項目（比遠或比久）選擇正確的策略。
+                </p>
+            </div>
+            <div class="chart-container" style="max-width: 550px;">
+                <canvas id="performanceBarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Visualization 4: Adjustment Success Rate (Donut Chart) -->
+        <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-green-600 mb-2">4. 常見問題調整成功率</h3>
+                <p class="text-sm text-gray-600 mb-2">
+                    當飛機飛行不穩定時，學生進行調整後的成功修正比例。顯示「調整副翼」是最有效的手段。
+                </p>
+            </div>
+            <div class="chart-container" style="max-width: 400px;">
+                <canvas id="adjustmentDonutChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Resources Section -->
+        <div class="md:col-span-2 bg-blue-50 rounded-lg p-6 border border-blue-200">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 text-center">📚 推薦參考書目與圖示範例</h3>
+            <p class="text-center text-blue-600 mb-6">以下書籍含有詳細的摺紙步驟圖 (Diagrams)，非常適合作為延伸閱讀。</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Book 1 -->
+                <div class="bg-white p-4 rounded shadow hover:shadow-lg transition">
+                    <div class="text-4xl mb-2">📖</div>
+                    <h4 class="font-bold text-lg text-gray-800">紙飛機的科學原理</h4>
+                    <p class="text-sm text-gray-500 mb-2">作者：户田拓夫 (Takuo Toda)</p>
+                    <p class="text-sm text-gray-600">世界紀錄保持人的著作，詳細解說如何摺出滯空時間最長的「Sky King」。</p>
+                </div>
+                <!-- Book 2 -->
+                <div class="bg-white p-4 rounded shadow hover:shadow-lg transition">
+                    <div class="text-4xl mb-2">📐</div>
+                    <h4 class="font-bold text-lg text-gray-800">超強紙飛機：摺法與飛行科學</h4>
+                    <p class="text-sm text-gray-500 mb-2">作者：肯·布萊克本 (Ken Blackburn)</p>
+                    <p class="text-sm text-gray-600">包含了大量不同造型的紙飛機範例，重點在於空氣動力學的微調技巧。</p>
+                </div>
+                <!-- Book 3 -->
+                <div class="bg-white p-4 rounded shadow hover:shadow-lg transition">
+                    <div class="text-4xl mb-2">✂️</div>
+                    <h4 class="font-bold text-lg text-gray-800">新世代紙飛機</h4>
+                    <p class="text-sm text-gray-500 mb-2">類型：圖解百科</p>
+                    <p class="text-sm text-gray-600">適合初學者的圖示範例集，包含基本的標槍型、燕子型與特技迴旋機。</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Updated Footer -->
+    <footer class="bg-gray-800 text-white text-center p-10 mt-12 border-t-4 border-blue-500">
+        <div class="max-w-4xl mx-auto">
+            <h4 class="text-lg font-bold tracking-wider mb-2 text-blue-400">STEM 未來工程師教育計畫</h4>
+            <p class="text-sm text-gray-300 mb-4">致力於透過手作實驗，啟發學童對航太科學的熱情與探索精神。</p>
+            <div class="border-t border-gray-700 my-4"></div>
+            <p class="text-sm text-gray-400">© 2025 科普應用教學資源中心 | 版權所有</p>
+            <p class="text-xs text-gray-600 mt-2">本頁面採用無 SVG / 無 Mermaid JS 技術構建，專注於高效能數據視覺化呈現。</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Utility Function for Wrapping Labels ---
+        function splitLabel(label, maxLength = 16) {
+            if (label.length <= maxLength) return label;
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if ((currentLine + " " + words[i]).length <= maxLength) {
+                    currentLine += " " + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        // --- Common Tooltip Config ---
+        const commonTooltipConfig = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    } else {
+                        return label;
+                    }
+                }
+            }
+        };
+
+        // --- Chart 1: The Four Forces (Radar) ---
+        const ctxRadar = document.getElementById('forcesRadarChart').getContext('2d');
+        new Chart(ctxRadar, {
+            type: 'radar',
+            data: {
+                labels: ['升力 (Lift)', '推力 (Thrust)', '重力 (Weight)', '阻力 (Drag)'],
+                datasets: [{
+                    label: '標槍機 (Dart)',
+                    data: [30, 90, 40, 20],
+                    backgroundColor: 'rgba(239, 68, 68, 0.2)', // Red
+                    borderColor: '#EF4444',
+                    pointBackgroundColor: '#EF4444',
+                }, {
+                    label: '滑翔機 (Glider)',
+                    data: [90, 40, 30, 70], // High Lift, High Drag
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)', // Blue
+                    borderColor: '#3B82F6',
+                    pointBackgroundColor: '#3B82F6',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: '#ccc' },
+                        grid: { color: '#eee' },
+                        pointLabels: {
+                            font: { size: 14, weight: 'bold' },
+                            color: '#374151'
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                },
+                plugins: {
+                    tooltip: commonTooltipConfig,
+                    legend: { position: 'top' }
+                }
+            }
+        });
+
+        // --- Chart 2: Trajectory Simulation (Line Chart) ---
+        // Using Chart.js for consistent Canvas rendering instead of Plotly SVG default risk
+        const ctxTrajectory = document.getElementById('trajectoryChart').getContext('2d');
+        
+        // Generate Curve Data
+        function generateCurve(angle, velocity) {
+            let data = [];
+            let gravity = 9.8;
+            let radian = angle * (Math.PI / 180);
+            for(let t = 0; t <= 5; t+=0.2) {
+                let x = velocity * Math.cos(radian) * t;
+                let y = (velocity * Math.sin(radian) * t) - (0.5 * gravity * t * t);
+                if (y < 0) break; // Hit ground
+                data.push({x: x, y: y});
+            }
+            return data;
+        }
+
+        new Chart(ctxTrajectory, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: '30度 發射角',
+                        data: generateCurve(30, 15),
+                        borderColor: '#F59E0B', // Amber
+                        backgroundColor: '#F59E0B',
+                        tension: 0.4,
+                        pointRadius: 0
+                    },
+                    {
+                        label: '45度 發射角',
+                        data: generateCurve(45, 15),
+                        borderColor: '#3B82F6', // Blue
+                        backgroundColor: '#3B82F6',
+                        tension: 0.4,
+                        pointRadius: 0
+                    },
+                    {
+                        label: '60度 發射角',
+                        data: generateCurve(60, 15),
+                        borderColor: '#EF4444', // Red
+                        backgroundColor: '#EF4444',
+                        tension: 0.4,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        title: { display: true, text: '飛行距離 (公尺)' },
+                        min: 0,
+                        max: 25
+                    },
+                    y: {
+                        title: { display: true, text: '高度 (公尺)' },
+                        min: 0,
+                        max: 10
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                         callbacks: {
+                            title: function(items) { return `X: ${items[0].parsed.x.toFixed(1)}m`; },
+                            label: function(item) { return `${item.dataset.label}: 高度 ${item.parsed.y.toFixed(1)}m`; }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- Chart 3: Performance Bar Chart ---
+        const ctxBar = document.getElementById('performanceBarChart').getContext('2d');
+        const rawBarLabels = ['尖頭標槍機 (Dart)', '寬翼滑翔機 (Glider)', '特技迴旋機 (Stunt)', '方形翼 (Square)'];
+        const processedBarLabels = rawBarLabels.map(l => splitLabel(l, 10)); // Force wrap for demo
+
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: processedBarLabels,
+                datasets: [
+                    {
+                        label: '平均飛行距離 (公尺)',
+                        data: [18.5, 12.0, 6.5, 10.2],
+                        backgroundColor: '#3B82F6',
+                    },
+                    {
+                        label: '平均滯空時間 (秒)',
+                        data: [2.1, 5.8, 3.2, 4.1],
+                        backgroundColor: '#F59E0B',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: commonTooltipConfig,
+                    legend: { position: 'bottom' }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // --- Chart 4: Adjustment Success (Donut) ---
+        const ctxDonut = document.getElementById('adjustmentDonutChart').getContext('2d');
+        new Chart(ctxDonut, {
+            type: 'doughnut',
+            data: {
+                labels: splitLabel('調整機翼尾端 (Elevators) 增加重心重量 (Weight) 改變投擲姿勢 (Posture) 其他 (Others)'),
+                datasets: [{
+                    data: [55, 25, 15, 5],
+                    backgroundColor: [
+                        '#3B82F6', // Blue
+                        '#F59E0B', // Amber
+                        '#EF4444', // Red
+                        '#9CA3AF'  // Gray
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: commonTooltipConfig,
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
